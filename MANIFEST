@@ -1,0 +1,8 @@
+Changes
+lib/Devel/Unplug.pm
+Makefile.PL
+MANIFEST
+README
+t/00.load.t
+t/pod-coverage.t
+t/pod.t

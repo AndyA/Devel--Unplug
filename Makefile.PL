@@ -14,8 +14,9 @@ WriteMakefile(
     ABSTRACT_FROM => 'lib/Devel/Unplug.pm',
     PL_FILES      => {},
     PREREQ_PM     => {
-        'Test::More' => 0,
-        'version'    => 0,
+        'Test::More'       => 0,
+        'version'          => 0,
+        'Devel::TraceLoad' => '0.0.9',
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES    => 'Devel-Unplug-*' },

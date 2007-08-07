@@ -2,19 +2,54 @@ package Devel::Unplug;
 
 use warnings;
 use strict;
-use Carp;
+use Devel::TraceLoad::Hook qw/register_require_hook/;
 
-use version; our $VERSION = qv( '0.1' );
+use vars qw($VERSION);
+$VERSION = '0.0.1';
 
-sub new {
-    my $class = shift;
-    my $self = bless {}, $class;
-    $self->_initialize( @_ );
-    return $self;
+sub _get_module {
+    my $file = shift;
+    return $file if $file =~ m{^/};
+    $file =~ s{/}{::}g;
+    $file =~ s/[.]pm$//;
+    return $file;
 }
 
-sub _initialize {
-    my $self = shift;
+{
+    my %unplugged = ();
+
+    sub unplug_module {
+        $unplugged{$_}++ for @_;
+    }
+
+    sub replug_module {
+        for my $mod ( @_ ) {
+            delete $unplugged{$mod}
+              if $unplugged{$mod} && 0 == --$unplugged{$mod};
+        }
+    }
+
+    sub get_unplugged {
+        return grep { $unplugged{$_} } keys %unplugged;
+    }
+
+    sub import {
+        unplug_module( @_ );
+        
+        register_require_hook(
+            sub {
+                my ( $when, $depth, $arg, $p, $f, $l, $rc, $err ) = @_;
+
+                return unless $when eq 'before';
+                my $module = _get_module( $arg );
+                return unless $unplugged{$module};
+
+                # Ain't gonna let you load it
+                die "Can't locate $arg in \@INC (unplugged by "
+                  . __PACKAGE__ . ")";
+            }
+        );
+    }
 }
 
 1;
@@ -22,11 +57,11 @@ __END__
 
 =head1 NAME
 
-Devel::Unplug - [One line description of module's purpose here]
+Devel::Unplug - Simulate the non-availability of modules
 
 =head1 VERSION
 
-This document describes Devel::Unplug version 0.1
+This document describes Devel::Unplug version 0.0.1
 
 =head1 SYNOPSIS
 
@@ -38,9 +73,11 @@ This document describes Devel::Unplug version 0.1
 
 =over
 
-=item C<< new >>
+=item C<< unplug_module >>
 
-Create a new C<< Devel::Unplug >>.
+=item C<< replug_module >>
+
+=item C<< get_unplugged >>
 
 =back
 

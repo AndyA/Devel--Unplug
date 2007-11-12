@@ -3,6 +3,10 @@ lib/Devel/Unplug.pm
 Makefile.PL
 MANIFEST
 README
-t/00.load.t
+t/000-load.t
+t/commandline.t
+t/lib/Some/Module.pm
+t/lib/Some/Other/Module.pm
 t/pod-coverage.t
 t/pod.t
+t/unplug.t

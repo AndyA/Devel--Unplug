@@ -2,10 +2,38 @@ package Devel::Unplug;
 
 use warnings;
 use strict;
-use Devel::TraceLoad::Hook qw/register_require_hook/;
+use Devel::TraceLoad::Hook qw( register_require_hook );
 
-use vars qw($VERSION);
-$VERSION = '0.0.1';
+=head1 NAME
+
+Devel::Unplug - Simulate the non-availability of modules
+
+=head1 VERSION
+
+This document describes Devel::Unplug version 0.02
+
+=cut
+
+use vars qw($VERSION @ISA);
+
+$VERSION = '0.02';
+
+=head1 SYNOPSIS
+
+    $ perl -d:Unplug=Some::Module,Some::Other::Module myprog.pl
+    Can't locate Some/Module.pm in @INC (unplugged by Devel::Unplug) at myprog.pl line 5.
+    BEGIN failed--compilation aborted at myprog.pl line 5.
+  
+=head1 DESCRIPTION
+
+Sometimes - particularly during testing - it's useful to be able to find
+out how your code behaves when a module it is expecting is unavailable.
+This module allows you to simulate the non-availability of a module.
+
+It uses L<Devel::TraceLoad::Hook> to replace C<require> (and hence
+C<use>) and intercept attempts to load modules.
+
+=cut
 
 sub _get_module {
     my $file = shift;
@@ -18,24 +46,59 @@ sub _get_module {
 {
     my %unplugged = ();
 
-    sub unplug_module {
+=head1 INTERFACE 
+
+None of these functions are exportable. Call them using their fully qualified names.
+
+=head2 C<< unplug >>
+
+Unplug one or more modules.
+
+    Devel::Unplug::unplug( 'Some::Module', 'Some::Other::Module' );
+
+=cut
+
+    sub unplug {
         $unplugged{$_}++ for @_;
+        return;
     }
 
-    sub replug_module {
+=head2 C<< insert >>
+
+Make an unplugged module available again.
+
+    Devel::Unplug::insert( 'Some::Module' );
+
+You must call C<insert> for a given module as many times as C<unplug>
+was called to make it available again.
+
+=cut
+
+    sub insert {
         for my $mod ( @_ ) {
             delete $unplugged{$mod}
               if $unplugged{$mod} && 0 == --$unplugged{$mod};
         }
+        return;
     }
 
-    sub get_unplugged {
+=head2 C<< unplugged >>
+
+Get the names of currently unplugged modules.
+
+    my @unp = Devel::Unplug::unplugged();
+
+=cut
+
+    sub unplugged {
         return grep { $unplugged{$_} } keys %unplugged;
     }
 
     sub import {
-        unplug_module( @_ );
-        
+        my $class = shift;
+
+        unplug( @_ );
+
         register_require_hook(
             sub {
                 my ( $when, $depth, $arg, $p, $f, $l, $rc, $err ) = @_;
@@ -55,39 +118,14 @@ sub _get_module {
 1;
 __END__
 
-=head1 NAME
-
-Devel::Unplug - Simulate the non-availability of modules
-
-=head1 VERSION
-
-This document describes Devel::Unplug version 0.0.1
-
-=head1 SYNOPSIS
-
-    use Devel::Unplug;
-  
-=head1 DESCRIPTION
-
-=head1 INTERFACE 
-
-=over
-
-=item C<< unplug_module >>
-
-=item C<< replug_module >>
-
-=item C<< get_unplugged >>
-
-=back
-
 =head1 DIAGNOSTICS
 
 =over
 
-=item C<< Error message here, perhaps with %s placeholders >>
+=item C<< Can't locate %s in @INC (unplugged by Devel::Unplug) >>
 
-[Description of error here]
+The error message that will be displayed when an attempt is made to load
+a module that has been unplugged.
 
 =back
 
@@ -115,9 +153,15 @@ L<http://rt.cpan.org>.
 
 Andy Armstrong  C<< <andy@hexten.net> >>
 
+=head1 TRIVIA
+
+The 'unplug' name and the choice of C<unplug> and C<insert> as the
+function names is based on the Acorn RISC OS commands of the same name.
+I'm sure you were wondering.
+
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Andy Armstrong C<< <andy@hexten.net> >>. All rights reserved.
+Copyright (c) 2007, Andy Armstrong C<< <andy@hexten.net> >>.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

@@ -9,13 +9,13 @@ Devel::Unplug - Simulate the non-availability of modules
 
 =head1 VERSION
 
-This document describes Devel::Unplug version 0.02
+This document describes Devel::Unplug version 0.03
 
 =cut
 
 use vars qw($VERSION @ISA);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -36,7 +36,6 @@ C<use>) and intercept attempts to load modules.
 
 sub _get_module {
     my $file = shift;
-    return $file if $file =~ m{^/};
     $file =~ s{/}{::}g;
     $file =~ s/[.]pm$//;
     return $file;
@@ -47,7 +46,7 @@ my %unplugged;
 sub _is_unplugged {
     my $module = shift;
 
-    for my $unp ( map { $_->[0] } values %unplugged ) {
+    for my $unp ( unplugged() ) {
         return 1
           if ( 'Regexp' eq ref $unp )
           ? $module =~ $unp
@@ -67,16 +66,16 @@ Unplug one or more modules.
 
     Devel::Unplug::unplug( 'Some::Module', 'Some::Other::Module' );
 
+Regular expressions may be used:
+
+    Devel::Unplug::unplug( qr{^Some:: (?: Other:: )? Module$}x );
+
 =cut
 
 sub unplug {
     for my $unp ( @_ ) {
-        if ( exists $unplugged{$unp} ) {
-            $unplugged{$unp}->[1]++;
-        }
-        else {
-            $unplugged{$unp} = [ $unp, 1 ];
-        }
+        exists $unplugged{$unp} and $unplugged{$unp}->[1]++
+          or $unplugged{$unp} = [ $unp, 1 ];
     }
     return;
 }
@@ -118,7 +117,8 @@ BEGIN {
 
 =head2 C<< unplugged >>
 
-Get the list of unplugged modules.
+Get the list of unplugged modules. The returned array may potentially
+contain a mixture of regular expressions and plain strings.
 
 =cut
 
@@ -128,7 +128,6 @@ sub unplugged {
 
 sub import {
     my $class = shift;
-
     unplug( @_ );
 }
 

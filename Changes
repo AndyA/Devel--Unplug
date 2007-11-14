@@ -7,3 +7,8 @@ Revision history for Devel-Unplug
         - Added OO interface
         - Allow regex module names
         - Work even if import isn't called
+
+0.03    2007-11-14
+        - Oops. Fixed commandline.t
+
+0.04

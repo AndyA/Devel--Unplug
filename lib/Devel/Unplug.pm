@@ -19,7 +19,7 @@ $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
-    $ perl -d:Unplug=Some::Module,Some::Other::Module myprog.pl
+    $ perl -MDevel::Unplug=Some::Module,Some::Other::Module myprog.pl
     Can't locate Some/Module.pm in @INC (unplugged by Devel::Unplug) at myprog.pl line 5.
     BEGIN failed--compilation aborted at myprog.pl line 5.
   

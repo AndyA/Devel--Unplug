@@ -2,7 +2,6 @@ package Devel::Unplug::OO;
 
 use strict;
 use warnings;
-use Carp;
 use Devel::Unplug ();
 
 =head1 NAME
@@ -31,7 +30,10 @@ $VERSION = '0.02';
 
 =head1 DESCRIPTION
 
-C<Devel::Unplug::OO> is an object oriented wrapper around L<Devel::Unplug>.
+C<Devel::Unplug::OO> is an object oriented wrapper around
+L<Devel::Unplug>. It provides a convenient interface for unplugging a
+set of modules for the life of a particular scope and then automatically
+inserting them at the end of the scope.
 
 =cut
 
@@ -39,12 +41,28 @@ C<Devel::Unplug::OO> is an object oriented wrapper around L<Devel::Unplug>.
 
 =head2 C<< new( $module ... ) >>
 
+Make a new C<Devel::Unplug::OO>. Any modules named as parameters
+will be unplugged. When the returned object is destroyed they will
+be re-inserted.
 
+    # Unplug
+    my $u = Devel::Unplug::OO->new( 'Some::Module' );
+    
+    # Insert
+    undef $u;
 
 =cut
 
 sub new {
-    
+    my $class = shift;
+    my $self = bless [@_], $class;
+    Devel::Unplug::unplug( @$self );
+    return $self;
+}
+
+sub DESTROY {
+    my $self = shift;
+    Devel::Unplug::insert( @$self );
 }
 
 1;

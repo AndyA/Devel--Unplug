@@ -1,11 +1,11 @@
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 4;
 use File::Spec;
-use Devel::Unplug;
+use Devel::Unplug::OO;
 use lib 't/lib';
 
-Devel::Unplug::unplug( 'Some::Module' );
+my $unp = Devel::Unplug::OO->new( 'Some::Module' );
 eval "use Some::Module";
 like $@, qr{Can't\s+locate\s+Some/Module.pm}, "error message";
 
@@ -15,9 +15,6 @@ ok !$@, "no error";
 my @unp = Devel::Unplug::unplugged();
 is_deeply \@unp, ['Some::Module'], "unplugged";
 
-Devel::Unplug::insert( 'Some::Module::That::Was::Not::Unplugged' );
-is_deeply \@unp, ['Some::Module'], "unplugged";
-
-Devel::Unplug::insert( 'Some::Module' );
+undef $unp;
 eval "use Some::Module";
 ok !$@, "no error" or diag $@;

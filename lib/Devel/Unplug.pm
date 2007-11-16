@@ -58,7 +58,8 @@ sub _is_unplugged {
 
 =head1 INTERFACE 
 
-None of these functions are exportable. Call them using their fully qualified names.
+None of these functions are exportable. Call them using their fully
+qualified names.
 
 =head2 C<< unplug >>
 
@@ -110,7 +111,8 @@ BEGIN {
             return unless _is_unplugged( $module );
 
             # Ain't gonna let you load it
-            die "Can't locate $arg in \@INC (unplugged by " . __PACKAGE__ . ")";
+            die "Can't locate $arg in \@INC (unplugged by "
+              . __PACKAGE__ . ")";
         }
     );
 }

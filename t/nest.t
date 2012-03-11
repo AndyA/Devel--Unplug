@@ -6,10 +6,10 @@ use Devel::Unplug;
 use lib 't/lib';
 
 sub is_unplugged($;$) {
-    my ( $list, $desc ) = @_;
-    $desc ||= join( ', ', @$list );
-    my @unp = Devel::Unplug::unplugged();
-    is_deeply [ sort @unp ], [ sort @$list ], $desc;
+  my ( $list, $desc ) = @_;
+  $desc ||= join( ', ', @$list );
+  my @unp = Devel::Unplug::unplugged();
+  is_deeply [ sort @unp ], [ sort @$list ], $desc;
 }
 
 Devel::Unplug::unplug( 'Some::Module', qr{^Other::} ) for 1 .. 2;

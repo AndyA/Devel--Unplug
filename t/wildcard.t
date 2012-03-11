@@ -16,7 +16,7 @@ eval "use Some::Other::Module";
 like $@, qr{Can't\s+locate\s+Some/Other/Module.pm}, "error message";
 
 my @unp = Devel::Unplug::unplugged();
-is_deeply \@unp, [ $match ], "unplugged OK";
+is_deeply \@unp, [$match], "unplugged OK";
 
 Devel::Unplug::insert( $match );
 eval "use Some::Module";

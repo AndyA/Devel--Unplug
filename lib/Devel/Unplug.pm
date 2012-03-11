@@ -35,25 +35,25 @@ C<use>) and intercept attempts to load modules.
 =cut
 
 sub _get_module {
-    my $file = shift;
-    $file =~ s{/}{::}g;
-    $file =~ s/[.]pm$//;
-    return $file;
+  my $file = shift;
+  $file =~ s{/}{::}g;
+  $file =~ s/[.]pm$//;
+  return $file;
 }
 
 my %unplugged;
 
 sub _is_unplugged {
-    my $module = shift;
+  my $module = shift;
 
-    for my $unp ( unplugged() ) {
-        return 1
-          if ( 'Regexp' eq ref $unp )
-          ? $module =~ $unp
-          : $module eq $unp;
-    }
+  for my $unp ( unplugged() ) {
+    return 1
+     if ( 'Regexp' eq ref $unp )
+     ? $module =~ $unp
+     : $module eq $unp;
+  }
 
-    return;
+  return;
 }
 
 =head1 INTERFACE 
@@ -74,11 +74,11 @@ Regular expressions may be used:
 =cut
 
 sub unplug {
-    for my $unp ( @_ ) {
-        exists $unplugged{$unp} and $unplugged{$unp}->[1]++
-          or $unplugged{$unp} = [ $unp, 1 ];
-    }
-    return;
+  for my $unp ( @_ ) {
+    exists $unplugged{$unp} and $unplugged{$unp}->[1]++
+     or $unplugged{$unp} = [ $unp, 1 ];
+  }
+  return;
 }
 
 =head2 C<< insert >>
@@ -93,28 +93,28 @@ was called to make it available again.
 =cut
 
 sub insert {
-    for my $mod ( @_ ) {
-        delete $unplugged{$mod}
-          if exists $unplugged{$mod} && 0 == --$unplugged{$mod}->[1];
-    }
-    return;
+  for my $mod ( @_ ) {
+    delete $unplugged{$mod}
+     if exists $unplugged{$mod} && 0 == --$unplugged{$mod}->[1];
+  }
+  return;
 }
 
 BEGIN {
-    use Devel::TraceLoad::Hook qw( register_require_hook );
-    register_require_hook(
-        sub {
-            my ( $when, $depth, $arg, $p, $f, $l, $rc, $err ) = @_;
+  use Devel::TraceLoad::Hook qw( register_require_hook );
+  register_require_hook(
+    sub {
+      my ( $when, $depth, $arg, $p, $f, $l, $rc, $err ) = @_;
 
-            return unless $when eq 'before';
-            my $module = _get_module( $arg );
-            return unless _is_unplugged( $module );
+      return unless $when eq 'before';
+      my $module = _get_module( $arg );
+      return unless _is_unplugged( $module );
 
-            # Ain't gonna let you load it
-            die "Can't locate $arg in \@INC (unplugged by "
-              . __PACKAGE__ . ")";
-        }
-    );
+      # Ain't gonna let you load it
+      die "Can't locate $arg in \@INC (unplugged by "
+       . __PACKAGE__ . ")";
+    }
+  );
 }
 
 =head2 C<< unplugged >>
@@ -125,12 +125,12 @@ contain a mixture of regular expressions and plain strings.
 =cut
 
 sub unplugged {
-    map { $_->[0] } values %unplugged;
+  map { $_->[0] } values %unplugged;
 }
 
 sub import {
-    my $class = shift;
-    unplug( @_ );
+  my $class = shift;
+  unplug( @_ );
 }
 
 1;

@@ -54,15 +54,15 @@ be re-inserted.
 =cut
 
 sub new {
-    my $class = shift;
-    my $self = bless [@_], $class;
-    Devel::Unplug::unplug( @$self );
-    return $self;
+  my $class = shift;
+  my $self = bless [@_], $class;
+  Devel::Unplug::unplug( @$self );
+  return $self;
 }
 
 sub DESTROY {
-    my $self = shift;
-    Devel::Unplug::insert( @$self );
+  my $self = shift;
+  Devel::Unplug::insert( @$self );
 }
 
 1;
